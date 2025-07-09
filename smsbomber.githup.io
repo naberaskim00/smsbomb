@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SMS Bomber Paneli & Yönetici Girişi</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30px 10px;
+  }
+  .container {
+    background: #1f2937;
+    border-radius: 10px;
+    padding: 20px 20px 25px 20px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  h1, h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #4ade80;
+    text-shadow: 0 0 8px #22c55e;
+  }
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #a5b4fc;
+    font-size: 0.85rem;
+    margin-left: 5%;
+  }
+  input[type="text"], input[type="password"], input[type="number"] {
+    width: 90%;
+    padding: 6px 8px;
+    border-radius: 5px;
+    border: none;
+    font-size: 0.9rem;
+    margin: 0 auto 12px auto;
+    display: block;
+    outline: none;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .speed-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px auto 20px auto;
+    width: 90%;
+  }
+  .speed-buttons button {
+    flex: 1;
+    margin: 0 4px;
+    padding: 8px 0;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #374151;
+    color: #c7d2fe;
+    box-shadow: 0 0 10px #6366f1;
+    transition: background-color 0.3s ease;
+  }
+  .speed-buttons button:hover {
+    background: #4f46e5;
+    color: white;
+    box-shadow: 0 0 15px #818cf8;
+  }
+  #startBtn, #loginBtn, #logoutBtn {
+    width: 90%;
+    background: #22c55e;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 12px #22c55eaa;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto 15px auto;
+  }
+  #startBtn:hover, #loginBtn:hover, #logoutBtn:hover {
+    background: #16a34a;
+  }
+  #log {
+    margin-top: 15px;
+    height: 120px;
+    background: #111827;
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #86efac;
+    box-shadow: inset 0 0 10px #22c55eaa;
+    line-height: 1.3;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.85rem;
+  }
+  th, td {
+    padding: 8px;
+    border: 1px solid #334155;
+    text-align: center;
+  }
+  th {
+    background: #0f766e;
+  }
+  #adminPanel {
+    display: none;
+  }
+  #adminLoginBtn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: #ef4444;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ef4444cc;
+    transition: background-color 0.3s ease;
+    color: white;
+  }
+  #adminLoginBtn:hover {
+    background: #b91c1c;
+  }
+  #adminLoginModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top:0; left:0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #adminLoginModal .modal-content {
+    background: #1f2937;
+    padding: 20px 25px;
+    border-radius: 10px;
+    width: 320px;
+    box-shadow: 0 0 15px #22c55e;
+    text-align: center;
+  }
+  #adminLoginModal input[type=password] {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  #adminLoginModal button {
+    width: 100%;
+  }
+  #adminLogoutBtn {
+    background: #f87171 !important;
+    margin-top: 15px !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="userPanel">
+  <button id="adminLoginBtn" title="Yönetici Girişi">Admin</button>
+  <h1>SMS Bomber Paneli</h1>
+  <label for="phone">Gönderilecek Numara</label>
+  <input type="text" id="phone" placeholder="05XXXXXXXXX" maxlength="11" />
+  <label for="count">SMS Adedi (max 200)</label>
+  <input type="number" id="count" min="1" max="200" value="10" />
+  <label>Hız Seçin</label>
+  <div class="speed-buttons">
+    <button data-speed="slow" style="background:#84cc16; color:#111;">Yavaş</button>
+    <button data-speed="medium" style="background:#facc15; color:#111;">Orta</button>
+    <button data-speed="fast" style="background:#f87171;">Hızlı</button>
+  </div>
+  <button id="startBtn">Gönderimi Başlat</button>
+  <div id="log"></div>
+</div>
+
+<div class="container" id="adminPanel">
+  <h1>Yönetici Paneli - Gönderim Kayıtları</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Numara</th>
+        <th>Adet</th>
+        <th>Hız</th>
+        <th>Tarih</th>
+        <th>Saat</th>
+      </tr>
+    </thead>
+    <tbody id="logTable"></tbody>
+  </table>
+  <button id="clearLogsBtn" style="background:#fbbf24; color:#111; margin-top: 10px;">Kayıtları Temizle</button>
+  <button id="adminLogoutBtn">Çıkış Yap</button>
+</div>
+
+<div id="adminLoginModal">
+  <div class="modal-content">
+    <h2>Yönetici Girişi</h2>
+    <input type="password" id="adminPassInput" placeholder="Şifre giriniz" autocomplete="off" />
+    <button id="adminLoginConfirmBtn">Giriş Yap</button>
+  </div>
+</div>
+
+<script>
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const adminLoginModal = document.getElementById('adminLoginModal');
+  const adminLoginConfirmBtn = document.getElementById('adminLoginConfirmBtn');
+  const adminPassInput = document.getElementById('adminPassInput');
+  const userPanel = document.getElementById('userPanel');
+  const adminPanel = document.getElementById('adminPanel');
+  const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+  const clearLogsBtn = document.getElementById('clearLogsBtn');
+  const phoneInput = document.getElementById('phone');
+  const countInput = document.getElementById('count');
+  const speedButtons = document.querySelectorAll('.speed-buttons button');
+  const startBtn = document.getElementById('startBtn');
+  const logDiv = document.getElementById('log');
+  const logTable = document.getElementById('logTable');
+
+  let speed = 'medium';
+  const speedMap = {
+    slow: 2000,
+    medium: 800,
+    fast: 300
+  };
+
+  window.addEventListener('load', () => {
+    userPanel.style.display = 'block';
+    adminPanel.style.display = 'none';
+    adminLoginModal.style.display = 'none';
+  });
+
+  speedButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      speedButtons.forEach(b => b.style.opacity = '0.5');
+      btn.style.opacity = '1';
+      speed = btn.dataset.speed;
+    });
+  });
+  speedButtons.forEach(b => b.style.opacity = '0.5');
+  speedButtons[1].style.opacity = '1';
+
+  function appendLog(text){
+    const time = new Date().toLocaleTimeString();
+    logDiv.innerHTML += `[${time}] SMS bomber gönderildi: ${text}<br>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function validatePhone(phone){
+    return /^05\d{9}$/.test(phone);
+  }
+
+  function saveToStorage(phone, count, speed){
+    const now = new Date();
+    const entry = {
+      phone,
+      count,
+      speed,
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString()
+    };
+    let logs = JSON.parse(localStorage.getItem("smsLogs") || "[]");
+    logs.push(entry);
+    localStorage.setItem("smsLogs", JSON.stringify(logs));
+  }
+
+  function loadLogs(){
+    const logs = JSON.parse(localStorage.getItem("smsLogs") || "[]");
+    logTable.innerHTML = '';
+    if(logs.length === 0){
+      logTable.innerHTML = '<tr><td colspan="5">Kayıt bulunamadı.</td></tr>';
+    } else {
+      logs.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.phone}</td>
+          <td>${entry.count}</td>
+          <td>${entry.speed}</td>
+          <td>${entry.date}</td>
+          <td>${entry.time}</td>
+        `;
+        logTable.appendChild(row);
+      });
+    }
+  }
+
+  startBtn.addEventListener('click', () => {
+    const phone = phoneInput.value.trim();
+    const count = Number(countInput.value);
+    logDiv.innerHTML = '';
+
+    if(!validatePhone(phone)){
+      appendLog('Hata: Geçerli numara giriniz (05XXXXXXXXX).');
+      return;
+    }
+    if(isNaN(count) || count < 1 || count > 200){
+      appendLog('Hata: SMS adedi 1-200 arasında olmalı.');
+      return;
+    }
+
+    appendLog(`Başlıyor: ${phone} - ${count} SMS (${speed.toUpperCase()})`);
+    saveToStorage(phone, count, speed);
+
+    let sent = 0;
+    startBtn.disabled = true;
+    phoneInput.disabled = true;
+    countInput.disabled = true;
+    speedButtons.forEach(b => b.disabled = true);
+
+    const interval = setInterval(() => {
+      sent++;
+      appendLog(`#${sent}`);
+
+      if(sent >= count){
+        clearInterval(interval);
+        appendLog('Gönderim tamamlandı!');
+        startBtn.disabled = false;
+        phoneInput.disabled = false;
+        countInput.disabled = false;
+        speedButtons.forEach(b => b.disabled = false);
+      }
+    }, speedMap[speed]);
+  });
+
+  adminLoginBtn.addEventListener('click', () => {
+    adminLoginModal.style.display = 'flex';
+    adminPassInput.focus();
+  });
+
+  adminLoginConfirmBtn.addEventListener('click', () => {
+    const pass = adminPassInput.value;
+    if(pass === '314651'){
+      adminPassInput.value = '';
+      adminLoginModal.style.display = 'none';
+      userPanel.style.display = 'none';
+      adminPanel.style.display = 'block';
+      loadLogs();
+    } else {
+      alert('Şifre yanlış!');
+      adminPassInput.focus();
+    }
+  });
+
+  adminLoginModal.addEventListener('click', e => {
+    if(e.target === adminLoginModal){
+      adminLoginModal.style.display = 'none';
+    }
+  });
+
+  adminLogoutBtn.addEventListener('click', () => {
+    adminPanel.style.display = 'none';
+    userPanel.style.display = 'block';
+  });
+
+  clearLogsBtn.addEventListener('click', () => {
+    if (confirm("Tüm kayıtları silmek istiyor musunuz?")) {
+      localStorage.removeItem("smsLogs");
+      logTable.innerHTML = '<tr><td colspan="5">Kayıt bulunamadı.</td></tr>';
+      alert("Kayıtlar silindi.");
+    }
+  });
+</script>
+
+</body>
+</html>
